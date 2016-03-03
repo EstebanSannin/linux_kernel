@@ -59,6 +59,7 @@ snd-soc-imx-wm8958-objs := imx-wm8958.o
 snd-soc-imx-wm8960-objs := imx-wm8960.o
 snd-soc-imx-tda1997x-objs := imx-tda1997x.o
 snd-soc-imx-ac97-vt1613-objs := imx-ac97-vt1613.o
+snd-soc-imx-tda1997x-objs := imx-tda1997x.o
 snd-soc-imx-wm8962-objs := imx-wm8962.o
 snd-soc-imx-sii902x-objs := imx-sii902x.o
 snd-soc-imx-spdif-objs := imx-spdif.o
@@ -67,6 +68,7 @@ snd-soc-imx-hdmi-objs := imx-hdmi.o
 snd-soc-imx-si476x-objs := imx-si476x.o
 snd-soc-imx-mqs-objs := imx-mqs.o
 snd-soc-imx-tda19988-objs :=imx-tda19988.o
+snd-soc-imx-es9023-objs :=imx-es9023.o
 
 obj-$(CONFIG_SND_SOC_EUKREA_TLV320) += snd-soc-eukrea-tlv320.o
 obj-$(CONFIG_SND_SOC_PHYCORE_AC97) += snd-soc-phycore-ac97.o
@@ -78,6 +80,7 @@ obj-${CONFIG_SND_SOC_IMX_WM8958} += snd-soc-imx-wm8958.o
 obj-${CONFIG_SND_SOC_IMX_WM8960} += snd-soc-imx-wm8960.o
 obj-$(CONFIG_SND_SOC_IMX_TDA1997X) += snd-soc-imx-tda1997x.o
 obj-$(CONFIG_SND_SOC_IMX_AC97_VT1613) += snd-soc-imx-ac97-vt1613.o
+obj-$(CONFIG_SND_SOC_IMX_TDA1997X) += snd-soc-imx-tda1997x.o
 obj-$(CONFIG_SND_SOC_IMX_WM8962) += snd-soc-imx-wm8962.o
 obj-$(CONFIG_SND_SOC_IMX_SII902X) += snd-soc-imx-sii902x.o
 obj-$(CONFIG_SND_SOC_IMX_SPDIF) += snd-soc-imx-spdif.o
@@ -87,6 +90,6 @@ obj-$(CONFIG_SND_SOC_IMX_SI476X) += snd-soc-imx-si476x.o
 obj-$(CONFIG_SND_SOC_IMX_MQS) += snd-soc-imx-mqs.o
 
 obj-$(CONFIG_SND_SOC_IMX_TDA19988) += snd-soc-imx-tda19988.o
-
+obj-$(CONFIG_SND_SOC_IMX_ES9023) += snd-soc-imx-es9023.o
 
 AFLAGS_hdmi_pcm.o := -march=armv7-a -mtune=cortex-a9 -mfpu=neon -mfloat-abi=softfp

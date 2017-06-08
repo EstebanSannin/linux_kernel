@@ -9,6 +9,7 @@
  * published by the Free Software Foundation.
  *
  */
+
 /dts-v1/;
 #include "imx6q.dtsi"
 #include "imx6qdl-udoo.dtsi"

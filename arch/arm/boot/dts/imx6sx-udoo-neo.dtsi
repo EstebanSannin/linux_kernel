@@ -19,10 +19,10 @@
 		mmc0 = &usdhc2;
 	};
 
-        pxp_v4l2_out {
-                compatible = "fsl,imx6sx-pxp-v4l2", "fsl,imx6sl-pxp-v4l2";
-                status = "okay";
-        };
+	pxp_v4l2_out {
+		compatible = "fsl,imx6sx-pxp-v4l2", "fsl,imx6sl-pxp-v4l2";
+		status = "disabled";
+	};
 
 	regulators {
 		compatible = "simple-bus";
@@ -153,10 +153,6 @@
 	status = "okay";
 };
 
-&gpc {
-	fsl,ldo-bypass = <1>;
-};
-
 &fec1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_enet1_2 &pinctrl_enet1_clkout_2>;
@@ -167,14 +163,10 @@
 	status = "okay";
 };
 
-&csi1 {
-	status = "okay";
-	port {
-		csi1_ep: endpoint {
-			remote-endpoint = <&vadc_ep>;
-		};
-	};
+&gpc {
+	fsl,ldo-bypass = <1>;
 };
+
 
 &i2c1 {
 	clock-frequency = <100000>;
@@ -322,73 +314,16 @@
 	};
 };
 
-&pxp {
-	status = "okay";
-};
-
-
-&uart3 { /* for bluetooth */
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_uart3_1>;
-	fsl,uart-has-rtscts;
-	status = "okay";
-};
-
-&usbotg1 { /* J2 micro USB port */
-	vbus-supply = <&reg_usb_otg1_vbus>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_usb_otg1_id>;
-	imx6-usb-charger-detection;
-	status = "okay";
-};
-
-&usbotg2 { /* J3 host USB port */
-	vbus-supply = <&reg_usb_otg2_vbus>;
-	dr_mode = "host";
-	status = "okay";
-};
-
-&usdhc2 {
-	pinctrl-names = "default", "state_100mhz", "state_200mhz";
-	pinctrl-0 = <&pinctrl_usdhc2>;
-	pinctrl-1 = <&pinctrl_usdhc2_100mhz>;
-	pinctrl-2 = <&pinctrl_usdhc2_200mhz>;
-	bus-width = <4>;
-	cd-gpios = <&gpio6 2 GPIO_ACTIVE_LOW>;
-	keep-power-in-suspend;
-	enable-sdio-wakeup;
-	vmmc-supply = <&vcc_sd2>;
-	status = "okay";
-};
-
-&usdhc3 { /* WiFi */
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_usdhc3_wifi>;
-	enable-sdio-wakeup;
-	non-removable;
-	vmmc-supply = <&wlan_en_reg>;
-	cap-power-off-card;
-	keep-power-in-suspend;
-	status = "okay";
-	#address-cells = <1>;
-	#size-cells = <0>;
-	wlcore: wlcore@0 {
-		compatible = "ti,wl1831";
-		reg = <2>;
-		interrupt-parent = <&gpio2>;
-		interrupts = <16 IRQ_TYPE_EDGE_RISING>;
-		ref-clock-frequency = <38400000>;
-		tcxo-clock-frequency = <26000000>;
-	};
-};
 
 &iomuxc {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_hog &external_hog>;
 
 	imx6x-udoo-neo {
+
 		pinctrl_hog: hoggrp {
 			fsl,pins = <
+
 				MX6SX_PAD_SD1_CLK__GPIO6_IO_0       0x80000000 // LED
 
 				MX6SX_PAD_NAND_CE0_B__GPIO4_IO_1    0x80000000 // Gyro interrupt
@@ -414,40 +349,6 @@
 				MX6SX_PAD_KEY_COL0__AUDMUX_AUD5_TXC     0x130b0
 				MX6SX_PAD_KEY_COL1__AUDMUX_AUD5_TXFS    0x130b0
 				MX6SX_PAD_KEY_ROW0__AUDMUX_AUD5_TXD     0x120b0
-			>;
-		};
-
-		pinctrl_lcd: lcdgrp {
-			fsl,pins = <
-				MX6SX_PAD_LCD1_DATA00__LCDIF1_DATA_0 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA01__LCDIF1_DATA_1 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA02__LCDIF1_DATA_2 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA03__LCDIF1_DATA_3 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA04__LCDIF1_DATA_4 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA05__LCDIF1_DATA_5 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA06__LCDIF1_DATA_6 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA07__LCDIF1_DATA_7 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA08__LCDIF1_DATA_8 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA09__LCDIF1_DATA_9 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA10__LCDIF1_DATA_10 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA11__LCDIF1_DATA_11 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA12__LCDIF1_DATA_12 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA13__LCDIF1_DATA_13 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA14__LCDIF1_DATA_14 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA15__LCDIF1_DATA_15 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA16__LCDIF1_DATA_16 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA17__LCDIF1_DATA_17 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA18__LCDIF1_DATA_18 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA19__LCDIF1_DATA_19 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA20__LCDIF1_DATA_20 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA21__LCDIF1_DATA_21 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA22__LCDIF1_DATA_22 0x4001b0b0
-				MX6SX_PAD_LCD1_DATA23__LCDIF1_DATA_23 0x4001b0b0
-				MX6SX_PAD_LCD1_CLK__LCDIF1_CLK	0x4001b0b0
-				MX6SX_PAD_LCD1_ENABLE__LCDIF1_ENABLE 0x4001b0b0
-				MX6SX_PAD_LCD1_VSYNC__LCDIF1_VSYNC 0x4001b0b0
-				MX6SX_PAD_LCD1_HSYNC__LCDIF1_HSYNC 0x4001b0b0
-				MX6SX_PAD_LCD1_RESET__GPIO3_IO_27 0x4001b0b0
 			>;
 		};
 
@@ -580,6 +481,40 @@
 			>;
 		};
 
+		pinctrl_lcd: lcdgrp {
+			fsl,pins = <
+				MX6SX_PAD_LCD1_DATA00__LCDIF1_DATA_0 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA01__LCDIF1_DATA_1 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA02__LCDIF1_DATA_2 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA03__LCDIF1_DATA_3 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA04__LCDIF1_DATA_4 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA05__LCDIF1_DATA_5 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA06__LCDIF1_DATA_6 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA07__LCDIF1_DATA_7 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA08__LCDIF1_DATA_8 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA09__LCDIF1_DATA_9 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA10__LCDIF1_DATA_10 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA11__LCDIF1_DATA_11 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA12__LCDIF1_DATA_12 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA13__LCDIF1_DATA_13 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA14__LCDIF1_DATA_14 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA15__LCDIF1_DATA_15 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA16__LCDIF1_DATA_16 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA17__LCDIF1_DATA_17 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA18__LCDIF1_DATA_18 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA19__LCDIF1_DATA_19 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA20__LCDIF1_DATA_20 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA21__LCDIF1_DATA_21 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA22__LCDIF1_DATA_22 0x4001b0b0
+				MX6SX_PAD_LCD1_DATA23__LCDIF1_DATA_23 0x4001b0b0
+				MX6SX_PAD_LCD1_CLK__LCDIF1_CLK	0x4001b0b0
+				MX6SX_PAD_LCD1_ENABLE__LCDIF1_ENABLE 0x4001b0b0
+				MX6SX_PAD_LCD1_VSYNC__LCDIF1_VSYNC 0x4001b0b0
+				MX6SX_PAD_LCD1_HSYNC__LCDIF1_HSYNC 0x4001b0b0
+				MX6SX_PAD_LCD1_RESET__GPIO3_IO_27 0x4001b0b0
+			>;
+		};
+
 		pinctrl_ldb_0: ldbctrlgrp-0 {
 			fsl,pins = <
 				MX6SX_PAD_SD1_DATA1__GPIO6_IO_3  	0x80000000	// BL_ON
@@ -594,6 +529,74 @@
 			>;
 		};
 
+	};
+};
+
+&uart3 { /* for bluetooth */
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart3_1>;
+	fsl,uart-has-rtscts;
+	status = "okay";
+};
+
+&usbotg1 { /* J2 micro USB port */
+	vbus-supply = <&reg_usb_otg1_vbus>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usb_otg1_id>;
+	imx6-usb-charger-detection;
+	status = "okay";
+};
+
+&usbotg2 { /* J3 host USB port */
+	vbus-supply = <&reg_usb_otg2_vbus>;
+	dr_mode = "host";
+	status = "okay";
+};
+
+&usdhc2 {
+	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+	pinctrl-0 = <&pinctrl_usdhc2>;
+	pinctrl-1 = <&pinctrl_usdhc2_100mhz>;
+	pinctrl-2 = <&pinctrl_usdhc2_200mhz>;
+	bus-width = <4>;
+	cd-gpios = <&gpio6 2 GPIO_ACTIVE_LOW>;
+	keep-power-in-suspend;
+	enable-sdio-wakeup;
+	vmmc-supply = <&vcc_sd2>;
+	status = "okay";
+};
+
+&usdhc3 { /* WiFi */
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usdhc3_wifi>;
+	enable-sdio-wakeup;
+	non-removable;
+	vmmc-supply = <&wlan_en_reg>;
+	cap-power-off-card;
+	keep-power-in-suspend;
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	wlcore: wlcore@0 {
+		compatible = "ti,wl1831";
+		reg = <2>;
+		interrupt-parent = <&gpio2>;
+		interrupts = <16 IRQ_TYPE_EDGE_RISING>;
+		ref-clock-frequency = <38400000>;
+		tcxo-clock-frequency = <26000000>;
+	};
+};
+
+&pxp {
+	status = "okay";
+};
+
+&csi1 {
+	status = "okay";
+	port {
+		csi1_ep: endpoint {
+			remote-endpoint = <&vadc_ep>;
+		};
 	};
 };
 

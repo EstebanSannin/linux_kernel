@@ -41,6 +41,10 @@
 };
 
 &mcctty{
+	status = "disabled";
+};
+
+&rpmsg{
 	status = "okay";
 };
 

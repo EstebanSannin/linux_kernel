@@ -34,7 +34,7 @@ struct rpmsgtty_port {
 static struct rpmsgtty_port rpmsg_tty_port;
 
 #define RPMSG_MAX_SIZE		(512 - sizeof(struct rpmsg_hdr))
-#define MSG		"hello world!"
+// #define MSG		"hello world!"
 
 static void rpmsg_tty_cb(struct rpmsg_channel *rpdev, void *data, int len,
 						void *priv, u32 src)
@@ -49,8 +49,8 @@ static void rpmsg_tty_cb(struct rpmsg_channel *rpdev, void *data, int len,
 
 	dev_dbg(&rpdev->dev, "msg(<- src 0x%x) len %d\n", src, len);
 
-	print_hex_dump(KERN_DEBUG, __func__, DUMP_PREFIX_NONE, 16, 1,
-			data, len,  true);
+//	print_hex_dump(KERN_DEBUG, __func__, DUMP_PREFIX_NONE, 16, 1,
+//			data, len,  true);
 
 	spin_lock_bh(&cport->rx_lock);
 	space = tty_prepare_flip_string(&cport->port, &cbuf, len);
@@ -82,6 +82,21 @@ static void rpmsgtty_close(struct tty_struct *tty, struct file *filp)
 	return tty_port_close(tty->port, tty, filp);
 }
 
+struct virtproc_info {
+        struct virtio_device *vdev;
+        struct virtqueue *rvq, *svq;
+        void *rbufs, *sbufs;
+        unsigned int num_bufs;
+        int last_sbuf;
+        dma_addr_t bufs_dma;
+        struct mutex tx_lock;
+        struct idr endpoints;
+        struct mutex endpoints_lock;
+        wait_queue_head_t sendq;
+        atomic_t sleepers;
+        struct rpmsg_endpoint *ns_ept;
+};
+
 static int rpmsgtty_write(struct tty_struct *tty, const unsigned char *buf,
 			 int total)
 {
@@ -91,6 +106,16 @@ static int rpmsgtty_write(struct tty_struct *tty, const unsigned char *buf,
 			struct rpmsgtty_port, port);
 	struct rpmsg_channel *rpdev = rptty_port->rpdev;
 
+	#define MSG "a"
+	#define M4_STATUS 0xbff0fff4
+	#define SBUF_OFFSET  0x0200
+	#define SBUF_SIZE   0x1fe00
+
+	u32 resp;
+	int i;
+	struct virtproc_info *vrp;
+	static void __iomem *m4_status;
+
 	if (NULL == buf) {
 		pr_err("buf shouldn't be null.\n");
 		return -ENOMEM;
@@ -98,6 +123,37 @@ static int rpmsgtty_write(struct tty_struct *tty, const unsigned char *buf,
 
 	count = total;
 	tbuf = buf;
+
+	vrp = rpdev->vrp;
+	m4_status = ioremap(M4_STATUS, 4);
+	resp = __raw_readl(m4_status);
+
+	if (resp == 0x7f) {
+
+		pr_info("Resetting TX buffer ...\n");
+
+		rpmsg_send(rpdev, MSG, strlen(MSG));
+		memset(vrp->sbufs + SBUF_OFFSET, 0x0, SBUF_SIZE);
+
+		ret = rpmsg_send(rpdev, (void *)tbuf, 1);
+
+		if (ret) {
+			dev_err(&rpdev->dev, "rpmsg_send failed: %d\n", ret);
+		}
+		count--;
+		tbuf++;
+
+		resp = __raw_readl(m4_status);
+
+		for (i=0; i<1000; i++) {
+			udelay(200);
+			resp = __raw_readl(m4_status);
+			if (resp != 0x7f)
+				break;
+		}
+	}
+	iounmap(m4_status);
+
 	do {
 		/* send a message to our remote processor */
 		ret = rpmsg_send(rpdev, (void *)tbuf,
@@ -146,11 +202,11 @@ static int rpmsg_tty_probe(struct rpmsg_channel *rpdev)
 	 * send a message to our remote processor, and tell remote
 	 * processor about this channel
 	 */
-	err = rpmsg_send(rpdev, MSG, strlen(MSG));
-	if (err) {
-		dev_err(&rpdev->dev, "rpmsg_send failed: %d\n", err);
-		return err;
-	}
+//	err = rpmsg_send(rpdev, MSG, strlen(MSG));
+//	if (err) {
+//		dev_err(&rpdev->dev, "rpmsg_send failed: %d\n", err);
+//		return err;
+//	}
 
 	rpmsgtty_driver = tty_alloc_driver(1, TTY_DRIVER_UNNUMBERED_NODE);
 	if (IS_ERR(rpmsgtty_driver))

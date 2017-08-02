@@ -83,14 +83,14 @@ static inline void pll_528_ss_enable(void)
 {
        void   __iomem *anatop_base;
        int enabled = 1;
-       u32 sys_ss=0xFA0001;
-       u32 sys_ss_rgb   = 0x00328001;
-       u32 sys_ss2_lvds = 0x00000012;
+       u32 sys_ss = 0xFA0001;
+       u32 sys_ss_rgb  = 0x00328001;
+       u32 sys_ss_lvds = 0x00000012;
 //     u32 denom=0x190;
 
        anatop_base = ioremap(ANATOP_ADDR, 4096);
        /* Disable spread spectrum mode */
-       writel_relaxed((readl_relaxed(anatop_base + PLL_528_SS_OFFSET) & ~ANADIG_PLL_528_SYS_SS_ENABLE), anatop_base + PLL_528_SS_OFFSET);
+       writel_relaxed((readl_relaxed(anatop_base + PLL_528_SS_OFFSET_RGB) & ~ANADIG_PLL_528_SYS_SS_ENABLE), anatop_base + PLL_528_SS_OFFSET_RGB);
    
        /* Write new values */
        writel_relaxed(sys_ss_lvds, anatop_base + PLL_528_SS_OFFSET_LVDS);
@@ -99,7 +99,7 @@ static inline void pll_528_ss_enable(void)
    
        /* Enable spread spectrum mode */
        if (enabled)
-               writel_relaxed((readl_relaxed(anatop_base + PLL_528_SS_OFFSET) | ANADIG_PLL_528_SYS_SS_ENABLE), anatop_base + PLL_528_SS_OFFSET);
+               writel_relaxed((readl_relaxed(anatop_base + PLL_528_SS_OFFSET_RGB) | ANADIG_PLL_528_SYS_SS_ENABLE), anatop_base + PLL_528_SS_OFFSET_RGB);
 
        iounmap(anatop_base);
         /* ENABLE SPREAD SPECTRUM FOR LCDIF VIDEO INTERFACE */

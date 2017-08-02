@@ -45,6 +45,21 @@ int rtc_year_days(unsigned int day, unsigned int month, unsigned int year)
 }
 EXPORT_SYMBOL(rtc_year_days);
 
+/*
+ *  Does the rtc_time represent a valid alarm?
+ */
+int rtc_valid_alrm (struct rtc_wkalrm *alrm)
+{
+	if (alrm->time.tm_mday < 1
+			|| alrm->time.tm_mday > 31
+			|| alrm->time.tm_wday < 0
+			|| alrm->time.tm_wday > 6
+			|| ((unsigned)alrm->time.tm_hour) >= 24
+			|| ((unsigned)alrm->time.tm_min) >= 60)
+		return -EINVAL;
+	return 0;
+}
+EXPORT_SYMBOL(rtc_valid_alrm);
 
 /*
  * rtc_time_to_tm64 - Converts time64_t to rtc_time.

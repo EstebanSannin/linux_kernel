@@ -348,6 +348,8 @@ static irqreturn_t imx_mu_isr(int irq, void *param)
 	return IRQ_HANDLED;
 }
 
+static void imx_gpcv2_add_m4_wake_up_irq(u32 hwirq, bool enable) {}
+
 static int imx_mu_probe(struct platform_device *pdev)
 {
 	int ret;

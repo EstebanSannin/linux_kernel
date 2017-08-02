@@ -75,22 +75,26 @@ static inline void imx6sx_enet_init(void)
 
 /* ENABLE SPREAD SPECTRUM FOR LCDIF VIDEO INTERFACE */
 #define ANATOP_ADDR 0x020c8000
-#define PLL_528_SS_OFFSET 0x40
+#define PLL_528_SS_OFFSET_RGB 0x40
+#define PLL_528_SS_OFFSET_LVDS 0x60
 #define ANADIG_PLL_528_SYS_SS_ENABLE 0x00008000
 
 static inline void pll_528_ss_enable(void)
 {
        void   __iomem *anatop_base;
-       anatop_base = ioremap(ANATOP_ADDR, 4096);
-       int enabled=1;
+       int enabled = 1;
        u32 sys_ss=0xFA0001;
+       u32 sys_ss_rgb   = 0x00328001;
+       u32 sys_ss2_lvds = 0x00000012;
 //     u32 denom=0x190;
 
+       anatop_base = ioremap(ANATOP_ADDR, 4096);
        /* Disable spread spectrum mode */
        writel_relaxed((readl_relaxed(anatop_base + PLL_528_SS_OFFSET) & ~ANADIG_PLL_528_SYS_SS_ENABLE), anatop_base + PLL_528_SS_OFFSET);
    
        /* Write new values */
-       writel_relaxed(sys_ss, anatop_base + PLL_528_SS_OFFSET);
+       writel_relaxed(sys_ss_lvds, anatop_base + PLL_528_SS_OFFSET_LVDS);
+       writel_relaxed(sys_ss_rgb,  anatop_base + PLL_528_SS_OFFSET_RGB);
 //     writel_relaxed(denom, anatop_base + PLL2_528_OFFSET + PLL_528_DENOM_DIV_OFFSET);
    
        /* Enable spread spectrum mode */
@@ -119,7 +123,6 @@ static void __init imx6sx_init_machine(void)
         if (of_machine_is_compatible("fsl,imx6sx-seco-b08"))
            pll_528_ss_enable();
         /* ENABLE SPREAD SPECTRUM FOR LCDIF VIDEO INTERFACE */
-
 }
 
 static void __init imx6sx_init_irq(void)

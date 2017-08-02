@@ -41,22 +41,32 @@
 
 #define FXOS8700_TYPE_ACC 	0x00
 #define FXOS8700_TYPE_MAG 	0x01
-
 #define FXOS8700_STANDBY 	0x00
 #define FXOS8700_ACTIVED 	0x01
 
-#define ABS_STATUS 			ABS_WHEEL
+#define ABS_STATUS		ABS_WHEEL
+#define FXOS8700_DRIVER		"fxos8700"
+
+
+
+
+
+
+
+
+
+
 struct fxos8700_data_axis{
-    short x;
+	short x;
 	short y;
 	short z;
 };
 
-struct fxos8700_data{
-	struct i2c_client * client;
-	struct miscdevice * acc_miscdev;
-	struct miscdevice * mag_miscdev;
-	struct input_dev * acc_idev;
+struct fxos8700_data {
+	struct i2c_client *client;
+	struct miscdevice *acc_miscdev;
+	struct miscdevice *mag_miscdev;
+	struct input_dev *acc_idev;
 	struct input_dev * mag_idev; 
 	atomic_t acc_delay;
 	atomic_t mag_delay;
@@ -100,20 +110,20 @@ static int fxos8700_data_convert(struct fxos8700_data_axis *axis_data,int positi
 static int fxos8700_change_mode(struct i2c_client *client, int type,int active)
 {
 	u8 data;
-	int acc_act,mag_act;
+	int acc_act, mag_act;
 	struct fxos8700_data *pdata =  i2c_get_clientdata(client);
 	acc_act = atomic_read(&pdata->acc_active);
 	mag_act = atomic_read(&pdata->mag_active);
 	data = i2c_smbus_read_byte_data(client, FXOS8700_CTRL_REG1);
-	if(type == FXOS8700_TYPE_ACC)
+	if (type == FXOS8700_TYPE_ACC)
 		acc_act = active;
 	else
 		mag_act = active;
-	if(acc_act ==  FXOS8700_ACTIVED || mag_act == FXOS8700_ACTIVED)     
+	if (acc_act ==  FXOS8700_ACTIVED || mag_act == FXOS8700_ACTIVED)
 		data |= 0x01;
 	else
 		data &= ~0x01;
-	i2c_smbus_write_byte_data(client, FXOS8700_CTRL_REG1,data); 
+	i2c_smbus_write_byte_data(client, FXOS8700_CTRL_REG1, data);
 	return 0;
 	
 }
@@ -188,7 +198,7 @@ static int fxos8700_device_init(struct i2c_client *client)
 {
 	int result;
 	struct fxos8700_data *pdata =  i2c_get_clientdata(client);
-	
+
 	result = i2c_smbus_write_byte_data(client, FXOS8700_CTRL_REG1, 0x00); //standby mode
 	if (result < 0)
 		goto out;
@@ -211,10 +221,10 @@ static int fxos8700_device_init(struct i2c_client *client)
 	}
 	atomic_set(&pdata->acc_active,FXOS8700_STANDBY);
 	atomic_set(&pdata->mag_active,FXOS8700_STANDBY);
-    atomic_set(&pdata->position ,FXOS8700_POSITION_DEFAULT);
+	atomic_set(&pdata->position ,FXOS8700_POSITION_DEFAULT);
 	return 0;
 out:
-	dev_err(&client->dev, "error when init fxos8700 device:(%d)", result);
+	dev_err(&client->dev, "Error when init fxos8700 device:(%d)", result);
 	return result;
 }
 
@@ -247,14 +257,14 @@ static int fxos8700_read_data(struct i2c_client *client,struct fxos8700_data_axi
 static long fxos8700_acc_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
 	struct fxos8700_data *pdata = file->private_data;
-	void __user *argp = (void __user *)arg;	
-    long ret = 0;
+	void __user *argp = (void __user *)arg;
+	struct fxos8700_data_axis data;
+	long ret = 0;
 	short sdata[3];
 	int enable;
 	int delay;
 	int position;
-	struct fxos8700_data_axis data;
-	if(!pdata){
+	if (!pdata) {
 		printk(KERN_ERR "fxos8700 struct datt point is NULL.");
 		return -EFAULT;
 	}
@@ -352,15 +362,15 @@ static const struct file_operations fxos8700_acc_fops = {
 static long fxos8700_mag_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
 	struct fxos8700_data *pdata = file->private_data;
-	void __user *argp = (void __user *)arg;	
-    long ret = 0;
+	void __user *argp = (void __user *)arg;
+	struct fxos8700_data_axis data;
+	long ret = 0;
 	short sdata[3];
 	int enable;
 	int delay;
 	int position;
-	
-	struct fxos8700_data_axis data;
-	if(!pdata){
+
+	if (!pdata) {
 		printk(KERN_ERR "fxos8700 struct datt point is NULL.");
 		return -EFAULT;
 	}
@@ -471,41 +481,43 @@ static ssize_t fxos8700_enable_show(struct device *dev,
 				   struct device_attribute *attr, char *buf)
 {
 	struct miscdevice *misc_dev = dev_get_drvdata(dev);
-	struct fxos8700_data * pdata = g_fxos8700_data;
-    int enable;
-	enable = 0;
-	if(pdata->acc_miscdev == misc_dev){
-		enable = atomic_read(&pdata->acc_active);
-	}
-	if(pdata->mag_miscdev == misc_dev){
-		enable = atomic_read(&pdata->mag_active);
-	}
-	return sprintf(buf, "%d\n", enable);
-}
+	struct fxos8700_data *pdata = g_fxos8700_data;
+	int enable = 0;
 
+	if (pdata->acc_miscdev == misc_dev)
+		enable = atomic_read(&pdata->acc_active);
+	if (pdata->mag_miscdev == misc_dev)
+		enable = atomic_read(&pdata->mag_active);
+
+	return sprintf(buf, "%d kkkl\n", enable);
+}
 
 static ssize_t fxos8700_enable_store(struct device *dev,
 				    struct device_attribute *attr,
 				    const char *buf, size_t count)
 {
 	struct miscdevice *misc_dev = dev_get_drvdata(dev);
-	struct fxos8700_data * pdata = g_fxos8700_data;
+	struct fxos8700_data *pdata = g_fxos8700_data;
 	struct i2c_client *client = pdata->client;
+	unsigned long enable;
 	int type;
-	int enable;
 	int ret;
-	enable = simple_strtoul(buf, NULL, 10);   
-	if(misc_dev == pdata->acc_miscdev)
+
+	if (kstrtoul(buf, 10, &enable) < 0)
+		return -EINVAL;
+
+	if (misc_dev == pdata->acc_miscdev)
 		type = FXOS8700_TYPE_ACC;
-	if(misc_dev == pdata->mag_miscdev)
+	if (misc_dev == pdata->mag_miscdev)
 		type = FXOS8700_TYPE_MAG;
 	enable = (enable > 0 ? FXOS8700_ACTIVED : FXOS8700_STANDBY);
-	ret = fxos8700_change_mode(client,type,enable);
-	if(!ret){
-		if(type == FXOS8700_TYPE_ACC)
+	ret = fxos8700_change_mode(client, type, enable);
+	if (!ret) {
+		if (type == FXOS8700_TYPE_ACC) {
 			atomic_set(&pdata->acc_active, enable);
-		else
+		} else {
 			atomic_set(&pdata->mag_active, enable);
+		}
 	}
 	return count;
 }
@@ -514,14 +526,14 @@ static ssize_t fxos8700_poll_delay_show(struct device *dev,
 				   struct device_attribute *attr, char *buf)
 {
 	struct miscdevice *misc_dev = dev_get_drvdata(dev);
-	struct fxos8700_data * pdata = g_fxos8700_data;
-    int poll_delay = 0;
-	if(pdata->acc_miscdev == misc_dev){
+	struct fxos8700_data *pdata = g_fxos8700_data;
+	int poll_delay = 0;
+
+	if (pdata->acc_miscdev == misc_dev)
 		poll_delay = atomic_read(&pdata->acc_delay);
-	}
-	if(pdata->mag_miscdev == misc_dev){
+	if (pdata->mag_miscdev == misc_dev)
 		poll_delay = atomic_read(&pdata->mag_delay);
-	}
+
 	return sprintf(buf, "%d\n", poll_delay);
 }
 
@@ -531,22 +543,23 @@ static ssize_t fxos8700_poll_delay_store(struct device *dev,
 				    const char *buf, size_t count)
 {
 	struct miscdevice *misc_dev = dev_get_drvdata(dev);
-	struct fxos8700_data * pdata = g_fxos8700_data;
+	struct fxos8700_data *pdata = g_fxos8700_data;
 	struct i2c_client *client = pdata->client;
+	unsigned long delay;
 	int type;
-	int delay;
 	int ret;
-	delay = simple_strtoul(buf, NULL, 10);   
-	if(misc_dev == pdata->acc_miscdev)
+
+	delay = simple_strtoul(buf, NULL, 10);
+	if (misc_dev == pdata->acc_miscdev)
 		type = FXOS8700_TYPE_ACC;
-	if(misc_dev == pdata->mag_miscdev)
+	if (misc_dev == pdata->mag_miscdev)
 		type = FXOS8700_TYPE_MAG;
-	ret = fxos8700_set_odr(client,type,delay);
-	if(!ret){
-		if(type == FXOS8700_TYPE_ACC)
-			atomic_set(&pdata->acc_delay,delay);
+	ret = fxos8700_set_odr(client, type, delay);
+	if (!ret) {
+		if (type == FXOS8700_TYPE_ACC)
+			atomic_set(&pdata->acc_delay, delay);
 		else
-			atomic_set(&pdata->mag_delay,delay);
+			atomic_set(&pdata->mag_delay, delay);
 	}
 	return count;
 }
@@ -554,25 +567,25 @@ static ssize_t fxos8700_poll_delay_store(struct device *dev,
 static ssize_t fxos8700_position_show(struct device *dev,
 				   struct device_attribute *attr, char *buf)
 {
-	struct fxos8700_data * pdata = g_fxos8700_data;
-    int position = 0;
-    position = atomic_read(&pdata->position) ;
-	return sprintf(buf, "%d\n", position);
+	struct fxos8700_data *pdata = g_fxos8700_data;
+	int position = 0;
+	position = atomic_read(&pdata->position);
+	return sprintf(buf, "%ld\n", position);
 }
 
 static ssize_t fxos8700_position_store(struct device *dev,
 				    struct device_attribute *attr,
 				    const char *buf, size_t count)
 {
-	int  position;
-	struct fxos8700_data * pdata = g_fxos8700_data;
-	position = simple_strtoul(buf, NULL, 10);    
-    atomic_set(&pdata->position, position);
+	unsigned long position;
+	struct fxos8700_data *pdata = g_fxos8700_data;
+	position = simple_strtoul(buf, NULL, 10);
+	atomic_set(&pdata->position, position);
 	return count;
 }
 
 static ssize_t fxos8700_data_show(struct device *dev,
-				     struct device_attribute *attr, char *buf)
+				  struct device_attribute *attr, char *buf)
 {
 	struct miscdevice *misc_dev = dev_get_drvdata(dev);
 	struct fxos8700_data * pdata = g_fxos8700_data;
@@ -592,13 +605,13 @@ static ssize_t fxos8700_data_show(struct device *dev,
 	return sprintf(buf, "%d,%d,%d\n",data.x,data.y,data.z);
 }
 
-static DEVICE_ATTR(enable, 0666,fxos8700_enable_show, fxos8700_enable_store);
+static DEVICE_ATTR(enable, S_IRUGO, fxos8700_enable_show, fxos8700_enable_store);
 
-static DEVICE_ATTR(poll_delay,0666,fxos8700_poll_delay_show, fxos8700_poll_delay_store);
+static DEVICE_ATTR(poll_delay, S_IRUGO, fxos8700_poll_delay_show, fxos8700_poll_delay_store);
 
-static DEVICE_ATTR(position, 0666,fxos8700_position_show, fxos8700_position_store);
+static DEVICE_ATTR(position, S_IRUGO, fxos8700_position_show, fxos8700_position_store);
 
-static DEVICE_ATTR(data, 0666,fxos8700_data_show, NULL);
+static DEVICE_ATTR(data, S_IRUGO, fxos8700_data_show, NULL);
 
 
 /*acc only sysfs interface*/
@@ -625,7 +638,7 @@ static ssize_t fxos8700_motion_detect_store(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(motion_detect, 0666,fxos8700_motion_detect_show, fxos8700_motion_detect_store);
+static DEVICE_ATTR(motion_detect, S_IRUGO, fxos8700_motion_detect_show, fxos8700_motion_detect_store);
 
 static struct attribute *fxos8700_acc_attributes[] = {
 	&dev_attr_enable.attr,
@@ -659,22 +672,20 @@ static int fxos8700_register_sysfs_device(struct fxos8700_data *pdata)
 	int err = -1;
 	/*register sysfs for acc*/
 	misc_dev = pdata->acc_miscdev;
-    err = sysfs_create_group(&misc_dev->this_device->kobj, &fxos8700_acc_attr_group);
-	if (err) {
+	err = sysfs_create_group(&misc_dev->this_device->kobj, &fxos8700_acc_attr_group);
+	if (err)
 		goto out;
-	}
 
-	/*register sysfs for mag*/
+	/* register sysfs for mag */
 	misc_dev = pdata->mag_miscdev;
-    err = sysfs_create_group(&misc_dev->this_device->kobj, &fxos8700_mag_attr_group);
-	if (err) {
+	err = sysfs_create_group(&misc_dev->this_device->kobj, &fxos8700_mag_attr_group);
+	if (err)
 		goto err_register_sysfs;
-	}
 	return 0;
 err_register_sysfs:
-   misc_dev = pdata->acc_miscdev;
-   sysfs_remove_group(&misc_dev->this_device->kobj,&fxos8700_acc_attr_group);  /*remove accel senosr sysfs*/
-   printk("reigster mag sysfs error\n");
+	misc_dev = pdata->acc_miscdev;
+	sysfs_remove_group(&misc_dev->this_device->kobj,&fxos8700_acc_attr_group);  /*remove accel senosr sysfs*/
+	printk("reigster mag sysfs error\n");
 out:
 	printk("reigster acc sysfs error\n");
 	return err;
@@ -682,12 +693,12 @@ out:
 static int fxos8700_unregister_sysfs_device(struct fxos8700_data *pdata)
 {
 	struct miscdevice *misc_dev = NULL;
-    misc_dev =  pdata->acc_miscdev;
-    sysfs_remove_group(&misc_dev->this_device->kobj,&fxos8700_acc_attr_group);  /*remove accel senosr sysfs*/
+	misc_dev =  pdata->acc_miscdev;
+	sysfs_remove_group(&misc_dev->this_device->kobj, &fxos8700_acc_attr_group);  /*remove accel senosr sysfs*/
 
-  	misc_dev =  pdata->mag_miscdev;
-  	sysfs_remove_group(&misc_dev->this_device->kobj,&fxos8700_mag_attr_group);  /*remove accel senosr sysfs*/
- 	return 0;
+	misc_dev = pdata->mag_miscdev;
+	sysfs_remove_group(&misc_dev->this_device->kobj, &fxos8700_mag_attr_group);  /*remove accel senosr sysfs*/
+	return 0;
 }
 
 
@@ -770,22 +781,22 @@ static irqreturn_t fxos8700_irq_handler(int irq, void *dev)
 	struct fxos8700_data_axis data;
 	acc_act = atomic_read(&pdata->acc_active);
 	mag_act = atomic_read(&pdata->mag_active);
-	int_src = i2c_smbus_read_byte_data(pdata->client,FXOS8700_INT_SOURCE);
-	if(int_src & 0x01 ){ //data ready interrupt
-		ret = fxos8700_read_data(pdata->client,&data,FXOS8700_TYPE_ACC);
-		if(!ret){
-			fxos8700_data_convert(&data,atomic_read(&pdata->position));
-			if(acc_act){
+	int_src = i2c_smbus_read_byte_data(pdata->client, FXOS8700_INT_SOURCE);
+	if (int_src & 0x01 ){ //data ready interrupt
+		ret = fxos8700_read_data(pdata->client, &data, FXOS8700_TYPE_ACC);
+		if (!ret){
+			fxos8700_data_convert(&data, atomic_read(&pdata->position));
+			if (acc_act){
 				input_report_abs(pdata->acc_idev, ABS_X, data.x);
 				input_report_abs(pdata->acc_idev, ABS_Y, data.y);
 				input_report_abs(pdata->acc_idev, ABS_Z, data.z);
 				input_sync(pdata->acc_idev);
 			}
 		}
-		ret = fxos8700_read_data(pdata->client,&data,FXOS8700_TYPE_MAG);
-		if(!ret){
-			fxos8700_data_convert(&data,atomic_read(&pdata->position));
-			if(mag_act){
+		ret = fxos8700_read_data(pdata->client, &data, FXOS8700_TYPE_MAG);
+		if (!ret){
+			fxos8700_data_convert(&data, atomic_read(&pdata->position));
+			if (mag_act) {
 				input_report_abs(pdata->mag_idev, ABS_X, data.x);
 				input_report_abs(pdata->mag_idev, ABS_Y, data.y);
 				input_report_abs(pdata->mag_idev, ABS_Z, data.z);
@@ -794,22 +805,22 @@ static irqreturn_t fxos8700_irq_handler(int irq, void *dev)
 		}
 			
 	}
-	if(int_src & (0x01 << 2) ){ //motion detect
-		i2c_smbus_read_byte_data(pdata->client,FXOS8700_FFMT_SRC); //clear ev flag
-		input_report_rel(pdata->acc_idev,REL_X, 1);
+	if (int_src & (0x01 << 2) ){ //motion detect
+		i2c_smbus_read_byte_data(pdata->client, FXOS8700_FFMT_SRC); //clear ev flag
+		input_report_rel(pdata->acc_idev, REL_X, 1);
 		input_sync(pdata->acc_idev);
 	}
 	
 	return IRQ_HANDLED;
 }
 
-static int fxos8700_probe(struct i2c_client *client, 
-			const struct i2c_device_id *id)
+static int fxos8700_probe(struct i2c_client *client,
+				   const struct i2c_device_id *id)
 {
 	int result, client_id;
-	struct fxos8700_data * pdata;
+	struct fxos8700_data *pdata;
 	struct i2c_adapter *adapter;
-	
+
 	adapter = to_i2c_adapter(client->dev.parent);
 	result = i2c_check_functionality(adapter,
 					 I2C_FUNC_SMBUS_BYTE |
@@ -821,36 +832,36 @@ static int fxos8700_probe(struct i2c_client *client,
 	if (client_id !=  FXOS8700_DEVICE_ID && client_id != FXOS8700_PRE_DEVICE_ID) {
 		dev_err(&client->dev,
 			"read chip ID 0x%x is not equal to 0x%x or 0x%x\n",
-			result, FXOS8700_DEVICE_ID,FXOS8700_PRE_DEVICE_ID);
+			result, FXOS8700_DEVICE_ID, FXOS8700_PRE_DEVICE_ID);
 		result = -EINVAL;
 		goto err_out;
 	}
-    pdata = kzalloc(sizeof(struct fxos8700_data), GFP_KERNEL);
-	if(!pdata){
+	pdata = kzalloc(sizeof(struct fxos8700_data), GFP_KERNEL);
+	if (!pdata) {
 		result = -ENOMEM;
 		dev_err(&client->dev, "alloc data memory error!\n");
 		goto err_out;
-    }
+	}
 	g_fxos8700_data = pdata;
 	pdata->client = client;
 	atomic_set(&pdata->acc_delay, FXOS8700_DELAY_DEFAULT);
 	atomic_set(&pdata->mag_delay, FXOS8700_DELAY_DEFAULT);
-	i2c_set_clientdata(client,pdata);
- 
+	i2c_set_clientdata(client, pdata);
+
 	result = misc_register(&fxos8700_acc_device);
 	if (result != 0) {
 		printk(KERN_ERR "register acc miscdevice error");
 		goto err_regsiter_acc_misc;
 	}
 	pdata->acc_miscdev = &fxos8700_acc_device;
-	
+
 	result = misc_register(&fxos8700_mag_device);
 	if (result != 0) {
 		printk(KERN_ERR "register acc miscdevice error");
 		goto err_regsiter_mag_misc;
 	}
 	pdata->mag_miscdev = &fxos8700_mag_device;
-	
+
 	result = fxos8700_register_sysfs_device(pdata);
 	if (result) {
 		dev_err(&client->dev, "create device file failed!\n");
@@ -863,8 +874,8 @@ static int fxos8700_probe(struct i2c_client *client,
 		result = -EINVAL;
 		goto err_register_input_device;
 	}
-	if(client->irq){
-		result= request_threaded_irq(client->irq,NULL, fxos8700_irq_handler,
+	if (client->irq){
+		result= request_threaded_irq(client->irq, NULL, fxos8700_irq_handler,
 				  IRQF_TRIGGER_LOW | IRQF_ONESHOT, client->dev.driver->name, pdata);
 		if (result < 0) {
 			dev_err(&client->dev, "failed to register fxos8700 irq %d!\n",
@@ -873,7 +884,7 @@ static int fxos8700_probe(struct i2c_client *client,
 		}
 	}
 	fxos8700_device_init(client);
-	printk("%s succ\n",__FUNCTION__);
+	printk("fxos8700 device driver probe successfully");
 	return 0;
 err_register_irq:
 	fxos8700_unregister_input_device(pdata);
@@ -886,7 +897,7 @@ err_regsiter_mag_misc:
 	misc_deregister(&fxos8700_acc_device);
 	pdata->acc_miscdev = NULL;
 err_regsiter_acc_misc:
-	i2c_set_clientdata(client,NULL);
+	i2c_set_clientdata(client, NULL);
 	kfree(pdata);
 err_out:
 	return result;
@@ -895,13 +906,13 @@ err_out:
 static int fxos8700_remove(struct i2c_client *client)
 {
 	struct fxos8700_data *pdata =  i2c_get_clientdata(client);
-	if(!pdata)
+	if (!pdata)
 		return 0;
-    fxos8700_device_stop(client);
+	fxos8700_device_stop(client);
 	fxos8700_unregister_sysfs_device(pdata);
 	misc_deregister(&fxos8700_acc_device);
 	misc_deregister(&fxos8700_mag_device);
-    kfree(pdata);		
+	kfree(pdata);
 	return 0;
 }
 
@@ -909,8 +920,8 @@ static int fxos8700_remove(struct i2c_client *client)
 static int fxos8700_suspend(struct device *dev)
 {
 	struct i2c_client *client = to_i2c_client(dev);
-	struct fxos8700_data *pdata =  i2c_get_clientdata(client);
-	if(atomic_read(&pdata->acc_active)|| atomic_read(&pdata->mag_active))
+	struct fxos8700_data *pdata = i2c_get_clientdata(client);
+	if (atomic_read(&pdata->acc_active) || atomic_read(&pdata->mag_active))
 		fxos8700_device_stop(client);
 	return 0;
 }
@@ -920,12 +931,11 @@ static int fxos8700_resume(struct device *dev)
     int ret = 0;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct fxos8700_data *pdata =  i2c_get_clientdata(client);
-	if(atomic_read(&pdata->acc_active))
-		fxos8700_change_mode(client,FXOS8700_TYPE_ACC,FXOS8700_ACTIVED);
-	if(atomic_read(&pdata->mag_active))
-		fxos8700_change_mode(client,FXOS8700_TYPE_MAG,FXOS8700_ACTIVED);
+	if (atomic_read(&pdata->acc_active))
+		fxos8700_change_mode(client, FXOS8700_TYPE_ACC, FXOS8700_ACTIVED);
+	if (atomic_read(&pdata->mag_active))
+		fxos8700_change_mode(client, FXOS8700_TYPE_MAG, FXOS8700_ACTIVED);
 	return ret;
-	  
 }
 #endif
 
@@ -939,14 +949,14 @@ MODULE_DEVICE_TABLE(of, fs_fxos8700_match);
 
 static const struct i2c_device_id fxos8700_id[] = {
 	{"fxos8700", 0},
-	{ }
+	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(i2c, fxos8700_id);
 
 static SIMPLE_DEV_PM_OPS(fxos8700_pm_ops, fxos8700_suspend, fxos8700_resume);
 static struct i2c_driver fxos8700_driver = {
 	.driver = {
-		   .name = "fxos8700",
+		   .name = FXOS8700_DRIVER,
 		   .owner = THIS_MODULE,
 		   .of_match_table = fs_fxos8700_match,
 		   .pm = &fxos8700_pm_ops,
@@ -956,26 +966,8 @@ static struct i2c_driver fxos8700_driver = {
 	.id_table = fxos8700_id,
 };
 
-static int __init fxos8700_init(void)
-{
-	/* register driver */
-	int res;
-	res = i2c_add_driver(&fxos8700_driver);
-	if (res < 0) {
-		printk(KERN_INFO "add fxos8700 i2c driver failed\n");
-		return -ENODEV;
-	}
-	return res;
-}
-
-static void __exit fxos8700_exit(void)
-{
-	i2c_del_driver(&fxos8700_driver);
-}
+module_i2c_driver(fxos8700_driver);
 
 MODULE_AUTHOR("Freescale Semiconductor, Inc.");
 MODULE_DESCRIPTION("FXOS8700 6-Axis Acc and Mag Combo Sensor driver");
 MODULE_LICENSE("GPL");
-
-module_init(fxos8700_init);
-module_exit(fxos8700_exit);

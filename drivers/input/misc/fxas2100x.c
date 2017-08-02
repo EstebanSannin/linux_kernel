@@ -85,11 +85,13 @@ enum {
 	STANDBY = 0,
 	ACTIVED,
 };
+
 struct fxas2100x_data_axis {
 	short x;
 	short y;
 	short z;
 };
+
 struct fxas2100x_data {
 	struct i2c_client *client;
 	struct input_dev * idev;
@@ -457,13 +459,13 @@ static ssize_t fxas2100x_data_show(struct device *dev,
 }
 
 
-static DEVICE_ATTR(enable, 0666, fxas2100x_enable_show, fxas2100x_enable_store);
+static DEVICE_ATTR(enable, S_IRUGO, fxas2100x_enable_show, fxas2100x_enable_store);
 
-static DEVICE_ATTR(poll_delay, 0666,fxas2100x_poll_delay_show, fxas2100x_poll_delay_store);
+static DEVICE_ATTR(poll_delay, S_IRUGO, fxas2100x_poll_delay_show, fxas2100x_poll_delay_store);
 
-static DEVICE_ATTR(position, 0666,fxas2100x_position_show, fxas2100x_position_store);
+static DEVICE_ATTR(position, S_IRUGO, fxas2100x_position_show, fxas2100x_position_store);
 
-static DEVICE_ATTR(data, 0666,fxas2100x_data_show, NULL);
+static DEVICE_ATTR(data, S_IRUGO, fxas2100x_data_show, NULL);
 
 
 static struct attribute *fxas2100x_attributes[] = {
@@ -657,28 +659,31 @@ static struct i2c_driver fxas2100x_driver = {
 	.remove		= fxas2100x_remove,
 	.id_table	= fxas2100x_id,
 };
+module_i2c_driver(fxas2100x_driver);
 
-static int __init fxas2100x_init(void)
-{
-	/* register driver */
-	int res;
-
-	res = i2c_add_driver(&fxas2100x_driver);
-	if (res < 0) {
-		printk(KERN_INFO "add fxas2100x i2c driver failed\n");
-		return -ENODEV;
-	}
-	return res;
-}
-
-static void __exit fxas2100x_exit(void)
-{
-	i2c_del_driver(&fxas2100x_driver);
-}
+// static int __init fxas2100x_init(void)
+// {
+// 	/* register driver */
+// 	int res;
+// 
+// printk(KERN_ERR "1111\n");
+// 	res = i2c_add_driver(&fxas2100x_driver);
+// 	if (res < 0) {
+// 		printk(KERN_INFO "add fxas2100x i2c driver failed\n");
+// 		return -ENODEV;
+// 	}
+// printk(KERN_ERR "2222\n");
+// 	return res;
+// }
+// 
+// static void __exit fxas2100x_exit(void)
+// {
+// 	i2c_del_driver(&fxas2100x_driver);
+// }
 
 MODULE_AUTHOR("Freescale Semiconductor, Inc.");
 MODULE_DESCRIPTION("FXAS2100X 3-Axis Gyrosope Sensor driver");
 MODULE_LICENSE("GPL");
 
-module_init(fxas2100x_init);
-module_exit(fxas2100x_exit);
+// module_init(fxas2100x_init);
+// module_exit(fxas2100x_exit);

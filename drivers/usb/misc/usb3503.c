@@ -280,6 +280,18 @@ static int usb3503_probe(struct usb3503 *hub)
 		hub->mode = mode;
 	}
 
+
+	if (gpio_is_valid(hub->gpio_reset)) {
+		err = devm_gpio_request_one(dev, hub->gpio_reset,
+				GPIOF_OUT_INIT_LOW, "usb3503 reset");
+		if (err) {
+			dev_err(dev,
+				"unable to request GPIO %d as reset pin (%d)\n",
+				hub->gpio_reset, err);
+			return err;
+		}
+	}
+
 	if (gpio_is_valid(hub->gpio_clk_en)) {
 		err = devm_gpio_request_one(dev, hub->gpio_clk_en,
 				GPIOF_OUT_INIT_HIGH, "usb3503 clk_en");
@@ -317,18 +329,6 @@ static int usb3503_probe(struct usb3503 *hub)
 			return err;
 		}
 	}
-
-	if (gpio_is_valid(hub->gpio_reset)) {
-		err = devm_gpio_request_one(dev, hub->gpio_reset,
-				GPIOF_OUT_INIT_LOW, "usb3503 reset");
-		if (err) {
-			dev_err(dev,
-				"unable to request GPIO %d as reset pin (%d)\n",
-				hub->gpio_reset, err);
-			return err;
-		}
-	}
-
 	usb3503_switch_mode(hub, hub->mode);
 
 	dev_info(dev, "%s: probed in %s mode\n", __func__,

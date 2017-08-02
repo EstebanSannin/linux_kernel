@@ -62,6 +62,7 @@
 #include <linux/usb/chipidea.h>
 #include <linux/usb/of.h>
 #include <linux/of.h>
+#include <linux/of_gpio.h>
 #include <linux/phy.h>
 #include <linux/regulator/consumer.h>
 #include <linux/usb/ehci_def.h>
@@ -547,6 +548,18 @@ int hw_wait_reg(struct ci_hdrc *ci, enum ci_hw_regs reg, u32 mask,
 
 	return 0;
 }
+static irqreturn_t ci_id_irq(int irq, void *data)
+{
+	struct ci_hdrc *ci = data;
+	if (gpio_get_value(ci->platdata->id_gpio) == 0) {
+		ci->id_event = true;
+		ci_otg_queue_work(ci);
+	} else {
+		ci->id_event = true;
+		ci_otg_queue_work(ci);
+	}
+	return IRQ_HANDLED;
+}
 
 static irqreturn_t ci_irq(int irq, void *data)
 {
@@ -700,6 +713,24 @@ static int ci_get_platdata(struct device *dev,
 	if (of_find_property(dev->of_node, "phy-clkgate-delay-us", NULL))
 		of_property_read_u32(dev->of_node, "phy-clkgate-delay-us",
 					&platdata->phy_clkgate_delay_us);
+
+        if (of_machine_is_compatible("fsl,imx6sx-seco-b08")) {
+	    if (platdata->dr_mode == USB_DR_MODE_OTG) {
+        	platdata->id_gpio = of_get_named_gpio(dev->of_node, "idirq-gpios", 0);
+        	if (platdata->id_gpio == -EPROBE_DEFER)
+                        return -EPROBE_DEFER;
+		ret = gpio_request(platdata->id_gpio, "id_irq-gpio");
+		if (ret) {
+			pr_err("%s: can't request gpio port %d, err: %d\n",
+				__func__, platdata->id_gpio, ret);
+			return -EINVAL;
+		}
+
+                gpio_direction_input(platdata->id_gpio);
+
+                platdata->id_irq = gpio_to_irq(platdata->id_gpio);
+	    }
+	}
 
 	return 0;
 }
@@ -983,6 +1014,14 @@ static int ci_hdrc_probe(struct platform_device *pdev)
 			ci->platdata->name, ci);
 	if (ret)
 		goto stop;
+
+        if (of_machine_is_compatible("fsl,imx6sx-seco-b08")) {
+	    if (ci->platdata->dr_mode == USB_DR_MODE_OTG) {
+		ret = devm_request_irq(dev, ci->platdata->id_irq, ci_id_irq, 
+			IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
+ 			"usb_otg_id", ci);
+	    }
+	}
 
 	if (ci->supports_runtime_pm) {
 		pm_runtime_set_active(&pdev->dev);

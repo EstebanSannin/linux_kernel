@@ -438,6 +438,22 @@ static int usbmisc_imx6sx_init(struct imx_usbmisc_data *data)
 
 	usbmisc_imx6q_init(data);
 
+	/* For HSIC controller */
+	if (of_machine_is_compatible("fsl,imx6sx-seco-b08") || (data->index == 2)) {
+		spin_lock_irqsave(&usbmisc->lock, flags);
+		writel(0x80001842, usbmisc->base + 0x8 + data->index * 4);
+		writel(0x00003800, usbmisc->base + data->index * 4);
+		spin_unlock_irqrestore(&usbmisc->lock, flags);
+
+		usleep_range(1000, 3000);
+
+		spin_lock_irqsave(&usbmisc->lock, flags);
+		writel(0x00003000, usbmisc->base + data->index * 4);
+		spin_unlock_irqrestore(&usbmisc->lock, flags);
+
+		usleep_range(1000, 3000);
+	}
+
 	spin_lock_irqsave(&usbmisc->lock, flags);
 	if (data->index == 0 || data->index == 1) {
 		reg = usbmisc->base + MX6_USB_OTG1_PHY_CTRL + data->index * 4;

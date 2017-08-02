@@ -12,13 +12,6 @@
 
 
 / {
-	model = "SECO B08 (based on iMX.6 SoloX)";
-	compatible = "fsl,imx6sx-seco-b08", "fsl,imx6sx-sdb", "fsl,imx6sx";
-
-	memory {
-		linux,usable-memory = <0x80000000 0x3f800000>;
-		reg = <0x80000000 0x40000000>;
-	};
 	
 	aliases {
 		mmc0 = &usdhc4;
@@ -49,29 +42,27 @@
 			regulator-boot-on;
 		};
 
-		reg_usb_otg1_vbus: usb_otg1_vbus {
+		reg_usb_otg1_vbus_j2: usb_otg1_vbus {
 			compatible = "regulator-fixed";
-			regulator-name = "usb_otg1_vbus";
-                        pinctrl-names = "default";
-                        pinctrl-0 = <&pinctrl_usb_otg1>;
+			regulator-name = "usb_otg1_vbus_j2";
 			regulator-min-microvolt = <5000000>;
 			regulator-max-microvolt = <5000000>;
 			gpio = <&gpio1 9 GPIO_ACTIVE_HIGH>;
 			enable-active-high;
 		};
 
-		reg_usb_otg2_vbus: usb_otg2_vbus {
+		reg_usb_otg2_vbus_j3: usb_otg2_vbus {
 			compatible = "regulator-fixed";
-			regulator-name = "usb_otg2_vbus";
+			regulator-name = "usb_otg2_vbus_j3";
 			regulator-min-microvolt = <5000000>;
 			regulator-max-microvolt = <5000000>;
 			gpio = <&gpio4 22 GPIO_ACTIVE_HIGH>;
 			enable-active-high;
 		};
 
-		reg_usb_otg3_vbus: usb_otg3_vbus {
+		reg_usb_hub_port3_vbus_j5: usb_otg3_vbus {
 			compatible = "regulator-fixed";
-			regulator-name = "usb_otg3_vbus";
+			regulator-name = "usb_hub_port3_vbus_j5";
 			regulator-min-microvolt = <5000000>;
 			regulator-max-microvolt = <5000000>;
 			gpio = <&gpio4 8 GPIO_ACTIVE_HIGH>;
@@ -79,20 +70,20 @@
 			regulator-boot-on;
 		};
 
-		reg_usb_otg4_vbus: usb_otg4_vbus {
+		reg_usb_hub_port4_vbus_j4: usb_otg4_vbus {
 			compatible = "regulator-fixed";
-			regulator-name = "usb_otg4_vbus";
+			regulator-name = "usb_hub_port4_vbus_j4";
 			regulator-min-microvolt = <5000000>;
 			regulator-max-microvolt = <5000000>;
-			gpio = <&gpio4 9 1>;
+			gpio = <&gpio4 9 GPIO_ACTIVE_HIGH>;
 			enable-active-high;
 			regulator-boot-on;
 		};
 
-	        reg_lcd_panel_on: lcd_pon {
+	        reg_rgb_panel_on: rgb_pon {
 			compatible = "regulator-fixed";
 			regulator-name = "LCD PANEL_ON";
-                	gpio = <&gpio4 18 GPIO_ACTIVE_HIGH>;
+                	gpio = <&gpio4 21 GPIO_ACTIVE_HIGH>;
 			enable-active-high;
         	};
 
@@ -131,25 +122,10 @@
 
 	};
 
-        backlight_lcd {
-                compatible = "gpio-backlight";
-                gpios = <&gpio6 3 GPIO_ACTIVE_HIGH>;
-                default-on;
-                status = "okay";
-        };
-
-// sii902x_reset: gpio-reset {
-//         compatible = "gpio-reset";
-//         reset-gpios = <&gpio5 0 GPIO_ACTIVE_LOW>;
-//         reset-delay-us = <10000>;
-//         initially-in-reset;
-//         #reset-cells = <0>;
-// };
-
 	emmc_reset: gpio-reset {
 		compatible = "gpio-reset";
-		gpios = "eMMC RESET_N";
-		gpio = <&gpio6 22 GPIO_ACTIVE_HIGH>;
+		gpios = "eMMC_RESET_N";
+		reset-gpios = <&gpio6 22 GPIO_ACTIVE_HIGH>;
 		status = "okay";
 	};
 
@@ -178,7 +154,6 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_hog>;
 
-//				MX6SX_PAD_NAND_RE_B__GPIO4_IO_12	0x80000000 // USB_VCC_SW_J3 on REV A
 	imx6x-seco-b08 {
 		pinctrl_hog: hoggrp {
 			fsl,pins = <
@@ -202,12 +177,15 @@
 
 				MX6SX_PAD_SD1_CLK__GPIO6_IO_0       	0x80000000 // LED
 
-				MX6SX_PAD_CSI_PIXCLK__GPIO1_IO_24	0x80000000	// {{external-gpio-23}}	
+				MX6SX_PAD_CSI_PIXCLK__GPIO1_IO_24	0x80000000 // {{external-gpio-23}}	
+
+				/* ENET2_COL / ENET2_CRS / KEY_ROW3 */
+				MX6SX_PAD_ENET2_COL__GPIO2_IO_6       	0x80000000    // CFG0
+				MX6SX_PAD_ENET2_CRS__GPIO2_IO_7       	0x80000000    // CFG1
+				MX6SX_PAD_KEY_ROW3__GPIO2_IO_18       	0x80000000    // CFG2
 
 			>;
 		};
-//                                MX6SX_PAD_RGMII2_RX_CTL__GPIO5_IO_16   0x8000E038
-//                                MX6SX_PAD_ENET1_COL__GPIO2_IO_0         0x80000000
 
                 pinctrl_audmux: audmuxgrp {
                         fsl,pins = <
@@ -270,9 +248,9 @@
                 pinctrl_ecspi3_1: ecspi3grp-1 {
                         fsl,pins = <
                                 MX6SX_PAD_QSPI1B_SCLK__ECSPI3_SCLK 	0x100b1
-                                MX6SX_PAD_QSPI1B_SS0_B__ECSPI3_SS0	0x100b1
                                 MX6SX_PAD_QSPI1B_DATA0__ECSPI3_MOSI	0x100b1
                                 MX6SX_PAD_QSPI1B_DATA1__ECSPI3_MISO	0x100b1
+                                MX6SX_PAD_QSPI1B_SS0_B__GPIO4_IO_30	0x80000000
                         >;
                 };
 
@@ -302,7 +280,6 @@
 			>;
 		};
 
-//				MX6SX_PAD_RGMII1_RX_CTL__ENET1_RX_EN    0x3081
 		pinctrl_enet1_2: enet1grp-2 {
 			fsl,pins = <
                                 MX6SX_PAD_RGMII1_RX_CTL__GPIO5_IO_4   0x80000000
@@ -328,7 +305,6 @@
 				MX6SX_PAD_KEY_ROW0__GPIO2_IO_15		0x80000000
 			>;
 		};
-//                                MX6SX_PAD_RGMII2_RX_CTL__GPIO5_IO_16    0x80000000
 
 		pinctrl_enet2_2: enet2grp-2 {
 			fsl,pins = <
@@ -342,12 +318,6 @@
 			>;
 		};
 
-//                                MX6SX_PAD_ENET1_COL__GPIO2_IO_0         0x80000000
-//                                MX6SX_PAD_ENET1_COL__GPIO2_IO_0         0x80000000
-//				MX6SX_PAD_RGMII2_RX_CTL__ENET2_RX_EN    0x3081
-//				MX6SX_PAD_RGMII2_RX_CTL__ENET2_RX_EN    0x3081
-//                                MX6SX_PAD_RGMII2_RX_CTL__GPIO5_IO_16   0x80000000
-
 		pinctrl_usdhc2_1: usdhc2grp-1 {
 			fsl,pins = <
 				MX6SX_PAD_SD2_CMD__USDHC2_CMD		0x17059
@@ -357,7 +327,7 @@
 				MX6SX_PAD_SD2_DATA2__USDHC2_DATA2	0x17059
 				MX6SX_PAD_SD2_DATA3__USDHC2_DATA3	0x17059
 				MX6SX_PAD_SD1_CMD__GPIO6_IO_1       	0x80000000 // uSD USDHC2 PWR
-				MX6SX_PAD_SD1_DATA0__GPIO6_IO_2     	0x80000000 // uSD USDHC2 CD
+				MX6SX_PAD_SD1_DATA0__GPIO6_IO_2     	0xb0b0 // uSD USDHC2 CD
 			>;
 		};
 
@@ -389,7 +359,6 @@
 				MX6SX_PAD_SD4_RESET_B__GPIO6_IO_22	0x80000000
 			>;
 		};
-//				MX6SX_PAD_SD4_RESET_B__USDHC4_RESET_B	0x17069
 
 		pinctrl_i2c1_1: i2c1grp-1 {
 			fsl,pins = <
@@ -441,16 +410,11 @@
 			>;
 		};
 
-		pinctrl_usb_otg1: usbotg1grp {
-			fsl,pins = <
-				MX6SX_PAD_GPIO1_IO09__GPIO1_IO_9	0x10b0 // USB_VCC_SW_J2
-				MX6SX_PAD_GPIO1_IO08__USB_OTG1_OC	0x10b0  // USB_VCC_SW_J2_OC
-			>;
-		};
-
                 pinctrl_usb_otg1_id: usbotg1idgrp {
                         fsl,pins = <
-                                MX6SX_PAD_GPIO1_IO10__ANATOP_OTG1_ID    0x17059
+				MX6SX_PAD_GPIO1_IO10__GPIO1_IO_10	0x10b0  // USB_ID
+				MX6SX_PAD_GPIO1_IO09__GPIO1_IO_9	0x10b0  // USB_VCC_SW_J2
+				MX6SX_PAD_GPIO1_IO08__USB_OTG1_OC	0x10b0  // USB_VCC_SW_J2_OC
                         >;
                 };
 
@@ -469,11 +433,11 @@
 
 		pinctrl_lcdif_ctrl_0: lcdifctrlgrp {
 			fsl,pins = <
-				MX6SX_PAD_LCD1_CLK__LCDIF1_CLK	0x4001b0b8
-				MX6SX_PAD_LCD1_ENABLE__LCDIF1_ENABLE 0x4001b0b8
-				MX6SX_PAD_LCD1_VSYNC__LCDIF1_VSYNC 0x4001b080
-				MX6SX_PAD_LCD1_HSYNC__LCDIF1_HSYNC 0x40018080
-				MX6SX_PAD_LCD1_RESET__GPIO3_IO_27  0x80000000
+				MX6SX_PAD_LCD1_CLK__LCDIF1_CLK		0x4001b0b8
+				MX6SX_PAD_LCD1_ENABLE__LCDIF1_ENABLE 	0x4001b0b8
+				MX6SX_PAD_LCD1_VSYNC__LCDIF1_VSYNC 	0x4001b080
+				MX6SX_PAD_LCD1_HSYNC__LCDIF1_HSYNC 	0x40018080
+				MX6SX_PAD_LCD1_RESET__GPIO3_IO_27  	0x80000000
 			>;
 		};
 
@@ -490,7 +454,6 @@
                         >;
                 };
 
-//				MX6SX_PAD_QSPI1A_SS0_B__GPIO4_IO_22  	0x80000000	// RGB_VGH_ON on REV B
 		pinctrl_rbg_lcd: rgblcdgrp-0 {
 			fsl,pins = <
 				MX6SX_PAD_RGMII2_TXC__GPIO5_IO_23	0x80000000	// RGB_BL_ON
@@ -579,7 +542,14 @@
         fsl,spi-num-chipselects = <1>;
         pinctrl-names = "default";
         pinctrl-0 = <&pinctrl_ecspi3_1>;
+	cs-gpios  = <&gpio4 30 GPIO_ACTIVE_HIGH>;
         status = "okay"; 
+        rtcO: pcf2123@0 {
+                compatible        = "nxp,rtc-pcf2123";
+                spi-max-frequency = <1000000>;
+                spi-cs-high;
+                reg = <0>;
+        };
 };
 
 &ecspi5 {
@@ -603,10 +573,10 @@
 	status = "okay";
 
          mdio {
-                 #address-cells = <1>;
-                 #size-cells = <0>;
+                #address-cells = <1>;
+                #size-cells = <0>;
 
-                 ethphy0: ethernet-phy@0 {
+                ethphy0: ethernet-phy@0 {
                         compatible = "ethernet-phy-ieee802.3-c22";
                         reg = <0>;
                 };
@@ -658,7 +628,6 @@
 	/* use ldo-bypass, u-boot will check it and configure */
 	fsl,ldo-bypass = <1>;
 };
-
 
 &i2c1 {
 	clock-frequency = <100000>;
@@ -763,13 +732,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c2_1>;
 	status = "okay";
-
-	barometer: mpl3115@60 {
-		compatible = "fsl,mpl3115";
-		reg = <0x60>;
-	};
 };
-
 
 &i2c3 {
 	clock-frequency = <100000>;
@@ -781,31 +744,32 @@
                 compatible = "smsc,usb3503";
                 reg = <0x08>;
                 disabled-ports = <>;
-	        vbusport3-supply = <&reg_usb_otg3_vbus>;
-	        vbusport4-supply = <&reg_usb_otg4_vbus>;
+	        vbusport3-supply = <&reg_usb_hub_port3_vbus_j5>;
+	        vbusport4-supply = <&reg_usb_hub_port4_vbus_j4>;
                 intn-gpios = <&gpio2 11 GPIO_ACTIVE_HIGH>;
                 reset-gpios = <&gpio2 13 GPIO_ACTIVE_HIGH>;
                 clk-en-gpios = <&gpio4 27 GPIO_ACTIVE_HIGH>;
                 initial-mode = <1>;
         };
+
+ 	accelerometer: fxos8700@1e {
+ 		compatible = "fsl,fxos8700";
+ 		reg = <0x1e>;
+ 		position = <3>;
+		interrupt-parent = <&gpio4>;
+		interrupts = <10 1>;
+		shared-interrupt;
+ 	};
+ 
+ 	gyroscope: fxas2100x@20 {
+ 		compatible = "fsl,fxas2100x";
+ 		reg = <0x20>;
+ 		position = <3>;
+		interrupt-parent = <&gpio4>;
+		interrupts = <26 1>;
+		shared-interrupt;
+ 	};
 };
-
-// &i2c4 {
-// 	clock-frequency = <100000>;
-// 	pinctrl-names = "default";
-// 	pinctrl-0 = <&pinctrl_i2c4_1>;
-// 
-// 	accelerometer: fxos8700@1e {
-// 		compatible = "fsl,fxos8700";
-// 		reg = <0x1e>;
-// 	};
-// 
-// 	gyroscope: fxas2100x@20 {
-// 		compatible = "fsl,fxas2100x";
-// 		reg = <0x20>;
-// 	};
-// };
-
 
 &uart1 {
 	pinctrl-names = "default";
@@ -819,6 +783,14 @@
 	status = "disabled";
 };
 
+&uart3 { /* for bluetooth */
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart3_1>;
+	fsl,uart-has-rtscts;
+	dma-names = "","tx";
+	status = "okay";
+};
+
 &uart6 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart6>;
@@ -826,24 +798,21 @@
 	status = "disabled";
 };
 
-&uart3 { /* for bluetooth */
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_uart3_1>;
-	fsl,uart-has-rtscts;
-	status = "okay";
-};
-
-//	imx6-usb-charger-detection;
-
 &usbotg1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usb_otg1_id>;
-	vbus-supply = <&reg_usb_otg1_vbus>;
+	vbus-supply = <&reg_usb_otg1_vbus_j2>;
+        idirq-gpios = <&gpio1 10 GPIO_ACTIVE_HIGH>;
+	dr_mode = "otg";
+        srp-disable;
+        hnp-disable;
+        adp-disable;
+	imx-usb-charger-detection;
 	status = "okay";
 };
 
 &usbotg2 {
-	vbus-supply = <&reg_usb_otg2_vbus>;
+	vbus-supply = <&reg_usb_otg2_vbus_j3>;
 	dr_mode = "host";
 	status = "okay";
 };
@@ -852,11 +821,10 @@
 	pinctrl-names = "idle", "active";
 	pinctrl-0 = <&pinctrl_usbh_1>;
 	pinctrl-1 = <&pinctrl_usbh_2>;
+	dr_mode = "host";
 	osc-clkgate-delay = <0x3>;
 	status = "okay";
 };
-
-//	compatible = "fsl,imx6q-usdhc-wilink";
 
 &usdhc2 {
 	pinctrl-names = "default";
@@ -903,19 +871,6 @@
 	status = "okay";
 };
 
-&pxp {
-	status = "okay";
-};
-
-&csi1 {
-	status = "okay";
-	port {
-		csi1_ep: endpoint {
-			remote-endpoint = <&vadc_ep>;
-		};
-	};
-};
-
 &qspi2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_qspi2_1>;
@@ -931,15 +886,3 @@
         };
 };
 
-&vadc {
-	vadc_in = <0>;
-	csi_id = <0>;
-	status = "okay";
-	port {
-		vadc_ep: endpoint {
-			remote-endpoint = <&csi1_ep>;
-		};
-	};
-};
-
-// #include "imx6sx-udoo-neo-externalpins.dtsi"

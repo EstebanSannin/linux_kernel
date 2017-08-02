@@ -336,8 +336,10 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
 	imx6q-udoo-hdmi.dtb \
 	imx6q-udoo-lvds7.dtb \
 	imx6q-udoo-lvds15.dtb \
-	imx6sx-seco-b08-lvds7.dtb \
-	imx6sx-seco-b08-lcdif.dtb \
+	imx6sx-seco-b08-basic-lvds7.dtb \
+	imx6sx-seco-b08-basic-rgb7.dtb \
+	imx6sx-seco-b08-full-lvds7.dtb \
+	imx6sx-seco-b08-full-rgb7.dtb \
 	imx6sx-udoo-neo-basic.dtb \
 	imx6sx-udoo-neo-basic-hdmi.dtb \
 	imx6sx-udoo-neo-basic-hdmi-m4.dtb \

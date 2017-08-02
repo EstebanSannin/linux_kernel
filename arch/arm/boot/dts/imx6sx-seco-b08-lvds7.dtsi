@@ -8,17 +8,33 @@
 *
 */
 
-/dts-v1/;
+#include "imx6sx-seco-b08.dtsi"
 
-#include "imx6sx-seco-b08.dtsi" 
+/ {
+        backlight_lcd {
+                compatible = "gpio-backlight";
+                gpios = <&gpio6 3 GPIO_ACTIVE_HIGH>;
+                default-on;
+                status = "okay";
+        };
+
+  
+                  reg_lcd_panel_on: lcd_pon {
+                          compatible = "regulator-fixed";
+                          regulator-name = "LCD PANEL_ON";
+                          gpio = <&gpio4 18 GPIO_ACTIVE_HIGH>;
+                          enable-active-high;
+                  };
+
+};
 
 &lcdif2 {
-	display = <&display1>;
+	display = <&display0>;
 	disp-dev = "ldb";
 	lcd-supply = <&reg_lcd_panel_on>;
 	status = "okay";
 
-	display1: display {
+	display0: display {
 		bits-per-pixel = <16>;
 		bus-width = <18>;
 	};

@@ -558,6 +558,7 @@
 	pinctrl-0 = <&pinctrl_usdhc2>;
 	pinctrl-1 = <&pinctrl_usdhc2_100mhz>;
 	pinctrl-2 = <&pinctrl_usdhc2_200mhz>;
+        no-1-8-v;
 	bus-width = <4>;
 	cd-gpios = <&gpio6 2 GPIO_ACTIVE_LOW>;
 	keep-power-in-suspend;

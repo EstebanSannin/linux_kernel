@@ -58,10 +58,6 @@
 };
 
 
-&snvs {
-	status = "disabled";
-};
-
 /*&i2c2 {
 	status = "disabled";
 };*/

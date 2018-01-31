@@ -20,11 +20,11 @@
 			reg = <0x84000000 0x00800000>;
 		};
 
-    /* Reserved 1Mb for MCC */
-    mcc_memory:  m4@0x9FF00000 {
-      no-map;
-      reg = <0x9FF00000 0x00100000>;
-    };
+		/* Reserved 1Mb for MCC */
+		mcc_memory:  m4@0x9FF00000 {
+			no-map;
+			reg = <0x9FF00000 0x00100000>;
+		};
 	};
 };
 
@@ -36,14 +36,9 @@
 	status = "okay";
 };
 
-&mcctest{
-	status = "disabled";
-};
-
-&mcctty{
+&rpmsg{
 	status = "okay";
 };
-
 
 /*
  * The flollowing modules are conflicting with M4, disable them when m4

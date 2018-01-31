@@ -36,18 +36,9 @@
 	status = "okay";
 };
 
-&mcctest{
-	status = "disabled";
-};
-
-&mcctty{
-	status = "disabled";
-};
-
 &rpmsg{
 	status = "okay";
 };
-
 
 /*
  * The flollowing modules are conflicting with M4, disable them when m4

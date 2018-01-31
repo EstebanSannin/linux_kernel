@@ -117,10 +117,6 @@
 	btwilink {
 	        compatible = "btwilink";
 	};
-
-	poweroff {
-		compatible = "udoo,poweroff";
-	};
 };
 
 &cpu0 {

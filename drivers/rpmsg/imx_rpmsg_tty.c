@@ -258,7 +258,7 @@ static void rpmsg_tty_remove(struct rpmsg_channel *rpdev)
 }
 
 static struct rpmsg_device_id rpmsg_driver_tty_id_table[] = {
-	{ .name	= "rpmsg-openamp-demo-channel" },
+	{ .name	= "rpmsg-arduino-channel" },
 	{ },
 };
 MODULE_DEVICE_TABLE(rpmsg, rpmsg_driver_tty_id_table);

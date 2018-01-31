@@ -34,7 +34,12 @@ struct rpmsgtty_port {
 static struct rpmsgtty_port rpmsg_tty_port;
 
 #define RPMSG_MAX_SIZE		(512 - sizeof(struct rpmsg_hdr))
-// #define MSG		"hello world!"
+#define HANDSHAKE_MSG		"0xHELLOM4"
+#define M4_STATUS_ADDR		0xbff0fff4
+#define ARDUINO_NOT_STARTED	0x7f
+#define ARDUINO_STARTED		0x5ff
+#define SBUF_OFFSET		0x0200
+#define SBUF_SIZE		0x1fe00
 
 static void rpmsg_tty_cb(struct rpmsg_channel *rpdev, void *data, int len,
 						void *priv, u32 src)
@@ -106,11 +111,6 @@ static int rpmsgtty_write(struct tty_struct *tty, const unsigned char *buf,
 			struct rpmsgtty_port, port);
 	struct rpmsg_channel *rpdev = rptty_port->rpdev;
 
-	#define MSG "a"
-	#define M4_STATUS 0xbff0fff4
-	#define SBUF_OFFSET  0x0200
-	#define SBUF_SIZE   0x1fe00
-
 	u32 resp;
 	int i;
 	struct virtproc_info *vrp;
@@ -125,14 +125,14 @@ static int rpmsgtty_write(struct tty_struct *tty, const unsigned char *buf,
 	tbuf = buf;
 
 	vrp = rpdev->vrp;
-	m4_status = ioremap(M4_STATUS, 4);
+	m4_status = ioremap(M4_STATUS_ADDR, 4);
 	resp = __raw_readl(m4_status);
 
-	if (resp == 0x7f) {
+	if (resp == ARDUINO_NOT_STARTED) {
 
 		pr_info("Resetting TX buffer ...\n");
 
-		rpmsg_send(rpdev, MSG, strlen(MSG));
+		rpmsg_send(rpdev, HANDSHAKE_MSG, strlen(HANDSHAKE_MSG));
 		memset(vrp->sbufs + SBUF_OFFSET, 0x0, SBUF_SIZE);
 
 		ret = rpmsg_send(rpdev, (void *)tbuf, 1);
@@ -202,11 +202,11 @@ static int rpmsg_tty_probe(struct rpmsg_channel *rpdev)
 	 * send a message to our remote processor, and tell remote
 	 * processor about this channel
 	 */
-//	err = rpmsg_send(rpdev, MSG, strlen(MSG));
-//	if (err) {
-//		dev_err(&rpdev->dev, "rpmsg_send failed: %d\n", err);
-//		return err;
-//	}
+	err = rpmsg_send(rpdev, HANDSHAKE_MSG, strlen(HANDSHAKE_MSG));
+	if (err) {
+		dev_err(&rpdev->dev, "rpmsg_send failed: %d\n", err);
+		return err;
+	}
 
 	rpmsgtty_driver = tty_alloc_driver(1, TTY_DRIVER_UNNUMBERED_NODE);
 	if (IS_ERR(rpmsgtty_driver))

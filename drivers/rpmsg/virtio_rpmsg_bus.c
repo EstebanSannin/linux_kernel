@@ -507,7 +507,7 @@ static struct rpmsg_channel *rpmsg_create_channel(struct virtproc_info *vrp,
 	if (tmp) {
 		/* decrement the matched device's refcount back */
 		put_device(tmp);
-		dev_err(dev, "channel %s:%x:%x already exist\n",
+		dev_dbg(dev, "channel %s:%x:%x already exist\n",
 				chinfo->name, chinfo->src, chinfo->dst);
 		return NULL;
 	}
@@ -751,8 +751,8 @@ int rpmsg_send_offchannel_raw(struct rpmsg_channel *rpdev, u32 src, u32 dst,
 	dev_dbg(dev, "TX From 0x%x, To 0x%x, Len %d, Flags %d, Reserved %d\n",
 					msg->src, msg->dst, msg->len,
 					msg->flags, msg->reserved);
-	print_hex_dump(KERN_DEBUG, "rpmsg_virtio TX: ", DUMP_PREFIX_NONE, 16, 1,
-					msg, sizeof(*msg) + msg->len, true);
+//	print_hex_dump(KERN_DEBUG, "rpmsg_virtio TX: ", DUMP_PREFIX_NONE, 16, 1,
+//					msg, sizeof(*msg) + msg->len, true);
 
 	sg_init_one(&sg, msg, sizeof(*msg) + len);
 
@@ -943,7 +943,7 @@ static void rpmsg_ns_cb(struct rpmsg_channel *rpdev, void *data, int len,
 	} else {
 		newch = rpmsg_create_channel(vrp, &chinfo);
 		if (!newch)
-			dev_err(dev, "rpmsg_create_channel failed\n");
+			dev_dbg(dev, "rpmsg_create_channel failed\n");
 	}
 }
 

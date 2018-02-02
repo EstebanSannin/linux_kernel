@@ -36,8 +36,7 @@ static struct rpmsgtty_port rpmsg_tty_port;
 #define RPMSG_MAX_SIZE		(512 - sizeof(struct rpmsg_hdr))
 #define HANDSHAKE_MSG		"0xHELLOM4"
 #define M4_STATUS_ADDR		0xbff0fff4
-#define ARDUINO_NOT_STARTED	0x7f
-#define ARDUINO_STARTED		0x5ff
+#define MASK_ARDUINO_LOOP	0x00000080
 #define SBUF_OFFSET		0x0200
 #define SBUF_SIZE		0x1fe00
 
@@ -128,9 +127,9 @@ static int rpmsgtty_write(struct tty_struct *tty, const unsigned char *buf,
 	m4_status = ioremap(M4_STATUS_ADDR, 4);
 	resp = __raw_readl(m4_status);
 
-	if (resp == ARDUINO_NOT_STARTED) {
+	if ((resp & MASK_ARDUINO_LOOP) != MASK_ARDUINO_LOOP) {
 
-		pr_info("Resetting TX buffer ...\n");
+		pr_info("Arduino loop() is not running: resetting TX buffer...\n");
 
 		rpmsg_send(rpdev, HANDSHAKE_MSG, strlen(HANDSHAKE_MSG));
 		memset(vrp->sbufs + SBUF_OFFSET, 0x0, SBUF_SIZE);

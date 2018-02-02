@@ -142,13 +142,12 @@ static int rpmsgtty_write(struct tty_struct *tty, const unsigned char *buf,
 		count--;
 		tbuf++;
 
-		resp = __raw_readl(m4_status);
-
 		for (i=0; i<1000; i++) {
 			udelay(200);
 			resp = __raw_readl(m4_status);
-			if (resp != 0x7f)
+			if ((resp & MASK_ARDUINO_LOOP) == MASK_ARDUINO_LOOP) {
 				break;
+			}
 		}
 	}
 	iounmap(m4_status);
